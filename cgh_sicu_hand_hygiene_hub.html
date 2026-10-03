@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CGH SICU Hand Hygiene Knowledge & Learning Hub</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: #f0fdf4; /* Very light cute mint/green background */
+      color: #1e293b;
+    }
+    h1, h2, h3, h4, .font-poppins {
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    /* Neumorphic / Cute rounded styling */
+    .cute-card {
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.15), 0 8px 10px -6px rgba(16, 185, 129, 0.1);
+      border: 2px solid #ecfdf5;
+    }
+    
+    .nav-glass {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid #d1fae5;
+    }
+
+    /* Flip Card CSS */
+    .flip-card {
+      perspective: 1000px;
+      height: 250px;
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      border: 2px solid #6ee7b7;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    .flip-card-front {
+      background-color: #ffffff;
+      color: #0f766e;
+    }
+    .flip-card-back {
+      background-color: #0f766e;
+      color: white;
+      transform: rotateY(180deg);
+      border-color: #047857;
+    }
+
+    /* Pulse and Pop animations */
+    .pulse-cute {
+      animation: pulse-cute 2s infinite;
+    }
+    @keyframes pulse-cute {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* Toast Notification */
+    .toast {
+      transform: translateY(150%);
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .toast.show {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-emerald-200 selection:text-emerald-900 overflow-x-hidden">
+
+  <header class="sticky top-0 z-50 nav-glass">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-[72px]">
+        <div class="flex items-center space-x-3">
+          <div class="text-3xl">🏥</div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-poppins font-bold text-emerald-800 text-lg sm:text-xl">CGH SICU Hand Hygiene Hub</span>
+            </div>
+            <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Quality Improvement Initiative</p>
+          </div>
+        </div>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden md:flex space-x-2 bg-emerald-50 p-1 rounded-2xl border border-emerald-100" id="navDesktop">
+          <button onclick="switchTab('flashcards')" id="tab-btn-flashcards" class="px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 bg-white text-emerald-700 shadow-sm border border-emerald-200">
+            🧠 Flashcards
+          </button>
+          <button onclick="switchTab('explorer')" id="tab-btn-explorer" class="px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 text-slate-500 hover:text-emerald-600 hover:bg-emerald-100/50">
+            🦠 5 Moments
+          </button>
+          <button onclick="switchTab('rubtimer')" id="tab-btn-rubtimer" class="px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 text-slate-500 hover:text-emerald-600 hover:bg-emerald-100/50">
+            ⏱️ Rub Coach
+          </button>
+          <button onclick="switchTab('insights')" id="tab-btn-insights" class="px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 text-slate-500 hover:text-emerald-600 hover:bg-emerald-100/50">
+            📊 CGH Data
+          </button>
+        </nav>
+      </div>
+
+      <!-- Mobile Nav -->
+      <div class="flex md:hidden overflow-x-auto py-3 space-x-2 no-scrollbar">
+        <button onclick="switchTab('flashcards')" id="tab-m-flashcards" class="whitespace-nowrap px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 text-white shadow-md">🧠 Flashcards</button>
+        <button onclick="switchTab('explorer')" id="tab-m-explorer" class="whitespace-nowrap px-4 py-2 text-xs font-bold rounded-xl bg-white text-slate-600 border border-emerald-200">🦠 5 Moments</button>
+        <button onclick="switchTab('rubtimer')" id="tab-m-rubtimer" class="whitespace-nowrap px-4 py-2 text-xs font-bold rounded-xl bg-white text-slate-600 border border-emerald-200">⏱️ Coach</button>
+        <button onclick="switchTab('insights')" id="tab-m-insights" class="whitespace-nowrap px-4 py-2 text-xs font-bold rounded-xl bg-white text-slate-600 border border-emerald-200">📊 Data</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Greeting Banner -->
+    <div class="cute-card p-6 sm:p-8 bg-gradient-to-br from-emerald-50 to-teal-50 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left relative overflow-hidden">
+      <div class="absolute -right-10 -top-10 text-9xl opacity-10">✨</div>
+      <div class="text-6xl sm:text-7xl animate-bounce">👋</div>
+      <div class="relative z-10 space-y-2">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-teal-900">
+          Thank you for completing the CGH SICU Hand Hygiene survey!
+        </h1>
+        <p class="text-sm sm:text-base text-teal-700 font-medium max-w-3xl">
+          We appreciate your time. Tap the flashcards below to quickly review the answers from Section 2 of the survey, or explore our cute interactive 5 Moments guide. Your honest feedback drives our unit's safety!
+        </p>
+      </div>
+    </div>
+
+    <div id="content-flashcards" class="space-y-6">
+      <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <span>🧠 Quick Knowledge Review</span>
+        </h2>
+        <span class="text-xs font-bold px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full">Tap cards to flip!</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Card 1: Duration -->
+        <div class="flip-card cursor-pointer group" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <span class="text-4xl mb-3">⏳</span>
+              <h3 class="font-bold text-lg leading-tight mb-2">Recommended duration for alcohol-based hand rub?</h3>
+              <p class="text-xs text-emerald-600 font-bold mt-auto bg-emerald-50 px-3 py-1 rounded-full">Survey Q3</p>
+            </div>
+            <div class="flip-card-back">
+              <span class="text-4xl mb-2">✅</span>
+              <h3 class="font-bold text-2xl text-yellow-300 mb-2">20–30 Seconds</h3>
+              <p class="text-sm leading-tight font-medium">Any less, and the alcohol doesn't have enough contact time to kill the bugs!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: 5 Moments -->
+        <div class="flip-card cursor-pointer group" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <span class="text-4xl mb-3">🖐️</span>
+              <h3 class="font-bold text-lg leading-tight mb-2">Which of these belong to the WHO 5 Moments?</h3>
+              <p class="text-xs text-emerald-600 font-bold mt-auto bg-emerald-50 px-3 py-1 rounded-full">Survey Q4</p>
+            </div>
+            <div class="flip-card-back">
+              <h3 class="font-bold text-lg text-yellow-300 mb-1">ALL except "Before touching the computer"!</h3>
+              <ul class="text-xs text-left space-y-1 font-medium bg-teal-800/50 p-2 rounded-xl w-full">
+                <li>1. Before touching patient</li>
+                <li>2. Before aseptic procedure</li>
+                <li>3. After body fluid exposure</li>
+                <li>4. After touching patient</li>
+                <li>5. After touching surroundings</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: HAIs -->
+        <div class="flip-card cursor-pointer group" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <span class="text-4xl mb-3">🛡️</span>
+              <h3 class="font-bold text-lg leading-tight mb-2">Hand hygiene is most important in preventing...</h3>
+              <p class="text-xs text-emerald-600 font-bold mt-auto bg-emerald-50 px-3 py-1 rounded-full">Survey Q5</p>
+            </div>
+            <div class="flip-card-back">
+              <span class="text-4xl mb-2">🏥</span>
+              <h3 class="font-bold text-xl text-yellow-300 mb-2">Healthcare-Associated Infections (HAIs)</h3>
+              <p class="text-sm leading-tight font-medium">It prevents BOTH viral and bacterial cross-transmission in the SICU.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Gloves -->
+        <div class="flip-card cursor-pointer group" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <span class="text-4xl mb-3">🧤</span>
+              <h3 class="font-bold text-lg leading-tight mb-2">Can gloves replace hand hygiene?</h3>
+              <p class="text-xs text-emerald-600 font-bold mt-auto bg-emerald-50 px-3 py-1 rounded-full">Survey Q6</p>
+            </div>
+            <div class="flip-card-back">
+              <span class="text-4xl mb-2">❌</span>
+              <h3 class="font-bold text-3xl text-yellow-300 mb-2">NO!</h3>
+              <p class="text-sm leading-tight font-medium">Microscopic leaks exist, and hands often get contaminated during glove removal.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="content-explorer" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-800">🦠 The CGH SICU Patient Zone</h2>
+          <p class="text-sm font-medium text-slate-500">Tap the emojis around the bed to explore the 5 Moments!</p>
+        </div>
+      </div>
+
+      <div class="cute-card p-6 flex flex-col lg:flex-row gap-8 items-center bg-sky-50 border-sky-100">
+        
+        <!-- Interactive Cute Room -->
+        <div class="relative w-full max-w-lg aspect-square bg-white rounded-[40px] shadow-inner border-4 border-slate-100 p-8 flex items-center justify-center">
+          
+          <!-- Background decorative -->
+          <div class="absolute inset-4 rounded-[32px] border-4 border-dashed border-emerald-200 bg-emerald-50/50 flex items-start justify-center pt-2">
+            <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Patient Zone</span>
+          </div>
+
+          <!-- Central Patient & Bed -->
+          <div class="relative z-10 text-[8rem] leading-none drop-shadow-lg cursor-pointer transition hover:scale-110" onclick="showMoment(1, 4)">
+            🛌
+            <!-- Moment 1 & 4 Hotspot -->
+            <div class="absolute -top-4 -right-4 bg-teal-500 text-white text-sm font-bold w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-md pulse-cute">1/4</div>
+          </div>
+
+          <!-- IV / Aseptic -->
+          <div class="absolute top-16 left-16 text-6xl cursor-pointer transition hover:scale-110 drop-shadow-md" onclick="showMoment(2, 2)">
+            🩸
+            <div class="absolute -top-2 -right-2 bg-blue-500 text-white text-xs font-bold w-8 h-8 rounded-full flex items-center justify-center border-2 border-white shadow-md pulse-cute">2</div>
+          </div>
+
+          <!-- Body Fluid / Drain -->
+          <div class="absolute bottom-16 right-16 text-6xl cursor-pointer transition hover:scale-110 drop-shadow-md" onclick="showMoment(3, 3)">
+            🧪
+            <div class="absolute -top-2 -right-2 bg-rose-500 text-white text-xs font-bold w-8 h-8 rounded-full flex items-center justify-center border-2 border-white shadow-md pulse-cute">3</div>
+          </div>
+
+          <!-- Moment 5: Surroundings (Curtains, Pumps, Rails) -->
+          <div class="absolute top-16 right-12 text-5xl cursor-pointer transition hover:scale-110 drop-shadow-md" onclick="showMoment(5, 5)">
+            🎛️
+            <div class="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold w-8 h-8 rounded-full flex items-center justify-center border-2 border-white shadow-md pulse-cute z-20">5</div>
+          </div>
+          <div class="absolute bottom-20 left-12 text-6xl cursor-pointer transition hover:scale-110 drop-shadow-md" onclick="showMoment(5, 5)">
+            🚪
+          </div>
+
+        </div>
+
+        <!-- Info Panel -->
+        <div class="flex-1 w-full space-y-4">
+          <div class="bg-white p-6 rounded-3xl border-2 border-slate-100 shadow-sm min-h-[300px] flex flex-col justify-center" id="moment-display-panel">
+            <div class="text-center space-y-4">
+              <span class="text-6xl animate-bounce inline-block">👈</span>
+              <h3 class="text-xl font-bold text-slate-400">Tap an emoji on the left!</h3>
+              <p class="font-medium text-slate-400">Discover which hand hygiene moment applies to different parts of the ICU room.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="content-rubtimer" class="hidden space-y-6">
+       <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-800">⏱️ The 25-Second Rub Coach</h2>
+          <p class="text-sm font-medium text-slate-500">Build sensory memory. Are you really rubbing for 20+ seconds?</p>
+        </div>
+      </div>
+
+      <div class="cute-card p-6 sm:p-10 flex flex-col items-center justify-center text-center space-y-8 bg-gradient-to-b from-white to-teal-50">
+        
+        <!-- Timer Display -->
+        <div class="relative w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center bg-white rounded-full shadow-[inset_0_10px_20px_rgba(0,0,0,0.05)] border-8 border-teal-100">
+          <svg class="absolute inset-0 w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="46" fill="none" stroke="#f1f5f9" stroke-width="8"></circle>
+            <circle id="coach-ring" cx="50" cy="50" r="46" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="0" class="transition-all duration-1000 linear"></circle>
+          </svg>
+          <div class="relative z-10 flex flex-col items-center">
+            <span id="coach-time" class="text-5xl sm:text-7xl font-black text-teal-900 font-poppins">25s</span>
+            <span id="coach-status" class="text-sm font-bold text-teal-600 uppercase tracking-widest mt-1">Ready</span>
+          </div>
+        </div>
+
+        <div class="space-y-2 h-20">
+          <span id="step-number" class="text-xs font-black text-slate-400 uppercase tracking-widest block">Standard WHO 6-Step</span>
+          <p id="step-text" class="text-xl sm:text-2xl font-bold text-slate-800">Press Start to begin training!</p>
+        </div>
+
+        <div class="flex gap-4">
+          <button id="coach-start-btn" onclick="toggleCoach()" class="px-8 py-4 bg-teal-600 hover:bg-teal-500 text-white text-lg font-bold rounded-2xl shadow-lg shadow-teal-600/30 transition-transform active:scale-95">
+            ▶️ Start Coach
+          </button>
+          <button onclick="resetCoach()" class="px-6 py-4 bg-white text-slate-500 hover:bg-slate-50 text-lg font-bold rounded-2xl border-2 border-slate-200 transition-transform active:scale-95">
+            🔄 Reset
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="content-insights" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-800">📊 CGH SICU Audit Insights</h2>
+          <p class="text-sm font-medium text-slate-500">Real talk from Cycle 1: Why we introduced the new digital cue.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <!-- Punchy Stats -->
+        <div class="space-y-4">
+          
+          <div class="cute-card p-6 border-l-8 border-rose-400">
+            <div class="text-4xl mb-2">🤯</div>
+            <h3 class="text-xl font-bold text-slate-800 mb-1">Forgetfulness Spiked</h3>
+            <p class="font-medium text-slate-600">
+              Staff citing "forgetfulness" as a barrier jumped from <strong class="text-rose-500 text-lg">26% to 75%</strong> by Week 3! High workload makes us run on autopilot.
+            </p>
+          </div>
+
+          <div class="cute-card p-6 border-l-8 border-teal-400">
+            <div class="text-4xl mb-2">❤️</div>
+            <h3 class="text-xl font-bold text-slate-800 mb-1">Driven by Conscience</h3>
+            <p class="font-medium text-slate-600">
+              Up to <strong class="text-teal-600 text-lg">62.5%</strong> of you clean your hands because of your own conscience, NOT because of audits or strict seniors.
+            </p>
+          </div>
+
+          <div class="cute-card p-6 border-l-8 border-amber-400 bg-amber-50">
+            <div class="text-4xl mb-2">⚠️</div>
+            <h3 class="text-xl font-bold text-slate-800 mb-1">The Moment 5 Blindspot</h3>
+            <p class="font-medium text-slate-600">
+              In real audits, compliance for Moment 5 (touching surroundings) dropped to <strong class="text-amber-600 text-lg">30.8%</strong>. We often forget that privacy curtains and bed rails carry patient bacteria!
+            </p>
+          </div>
+
+        </div>
+
+        <!-- The Digital Visual Cue Image -->
+        <div class="cute-card p-6 text-center space-y-4 bg-slate-50">
+          <h3 class="font-bold text-lg text-slate-800">Our New PDSA Cycle 2 Nudge 📱</h3>
+          <p class="text-sm font-medium text-slate-500">You will see this pop up on MS Teams/WhatsApp at the start of your rotation!</p>
+          
+          <img src="sicu_hh_digital_cue_v11.jpg" alt="CGH SICU Visual Cue" class="rounded-2xl shadow-md w-full max-w-sm mx-auto object-cover border border-slate-200" onerror="this.src='https://placehold.co/600x800/1e293b/10b981?text=CGH+SICU+Visual+Cue+Image+Missing'">
+          
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="audit-toast" class="fixed bottom-6 right-6 max-w-sm bg-white p-4 rounded-2xl shadow-2xl border-2 border-emerald-500 toast z-50 flex items-start gap-4">
+    <div class="text-3xl" id="toast-emoji">💡</div>
+    <div>
+      <h4 class="font-bold text-emerald-800 text-sm uppercase tracking-wide">CGH SICU Fact</h4>
+      <p id="toast-text" class="text-sm font-medium text-slate-600 mt-1">Audit data goes here.</p>
+    </div>
+    <button onclick="hideToast()" class="text-slate-400 hover:text-slate-600 font-bold ml-auto">&times;</button>
+  </div>
+
+  <script>
+    // Tab Switching
+    function switchTab(tabId) {
+      const tabs = ['flashcards', 'explorer', 'rubtimer', 'insights'];
+      tabs.forEach(t => {
+        const content = document.getElementById('content-' + t);
+        const desktopBtn = document.getElementById('tab-btn-' + t);
+        const mobileBtn = document.getElementById('tab-m-' + t);
+
+        if (t === tabId) {
+          content.classList.remove('hidden');
+          desktopBtn.className = "px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 bg-white text-emerald-700 shadow-sm border border-emerald-200";
+          mobileBtn.className = "whitespace-nowrap px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 text-white shadow-md";
+        } else {
+          content.classList.add('hidden');
+          desktopBtn.className = "px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 text-slate-500 hover:text-emerald-600 hover:bg-emerald-100/50";
+          mobileBtn.className = "whitespace-nowrap px-4 py-2 text-xs font-bold rounded-xl bg-white text-slate-600 border border-emerald-200";
+        }
+      });
+    }
+
+    // 5 Moments Explorer Data
+    const momentsData = {
+      1: { emoji: "🛌", title: "Moments 1 & 4: The Patient", text: "Before touching the patient (Moment 1) protects them from your germs. After touching them (Moment 4) protects YOU and the environment.", color: "text-teal-600" },
+      2: { emoji: "🩸", title: "Moment 2: Clean/Aseptic", text: "Crucial for preventing CLABSI! Clean hands IMMEDIATELY before accessing a central line or drawing blood, even if donning gloves.", color: "text-blue-600" },
+      3: { emoji: "🧪", title: "Moment 3: Body Fluid Risk", text: "Instinct usually makes us wash after emptying drains or urine bags, but remember to do it IMMEDIATELY after glove removal!", color: "text-rose-600" },
+      5: { emoji: "🎛️", title: "Moment 5: Surroundings (Our Focus!)", text: "Bed rails, IV pumps, and PRIVACY CURTAINS harbor patient flora. Clean your hands after touching these, even if you never touched the patient!", color: "text-amber-600" }
+    };
+
+    function showMoment(id, num) {
+      const panel = document.getElementById('moment-display-panel');
+      const data = momentsData[id];
+      panel.innerHTML = `
+        <div class="text-center space-y-3 animate-pulse">
+          <div class="text-7xl mb-2">${data.emoji}</div>
+          <h3 class="text-2xl font-bold ${data.color}">${data.title}</h3>
+          <p class="text-base font-medium text-slate-600 leading-relaxed max-w-md mx-auto">${data.text}</p>
+        </div>
+      `;
+    }
+
+    // 25s Rub Coach Logic
+    let coachInterval;
+    let coachTime = 25;
+    const totalCoachTime = 25;
+    let isCoaching = false;
+
+    const rubSteps = [
+      { t: 25, msg: "Palm to palm" },
+      { t: 21, msg: "Right over left dorsum, and vice versa" },
+      { t: 17, msg: "Palm to palm with fingers interlaced" },
+      { t: 13, msg: "Backs of fingers to opposing palms" },
+      { t: 9, msg: "Rotational rubbing of thumbs" },
+      { t: 5, msg: "Rotational rubbing of fingertips" }
+    ];
+
+    function toggleCoach() {
+      const btn = document.getElementById('coach-start-btn');
+      if (isCoaching) {
+        clearInterval(coachInterval);
+        isCoaching = false;
+        btn.innerHTML = "▶️ Resume";
+        document.getElementById('coach-status').innerText = "Paused";
+      } else {
+        isCoaching = true;
+        btn.innerHTML = "⏸️ Pause";
+        document.getElementById('coach-status').innerText = "Rubbing...";
+        
+        coachInterval = setInterval(() => {
+          coachTime--;
+          updateCoachUI();
+          if (coachTime <= 0) {
+            clearInterval(coachInterval);
+            isCoaching = false;
+            document.getElementById('coach-time').innerText = "DONE";
+            document.getElementById('coach-status').innerText = "Hands Safe!";
+            btn.innerHTML = "🔄 Start Over";
+            coachTime = totalCoachTime; // setup for restart
+          }
+        }, 1000);
+      }
+    }
+
+    function updateCoachUI() {
+      if (coachTime > 0) document.getElementById('coach-time').innerText = coachTime + "s";
+      
+      const offset = 289 - (coachTime / totalCoachTime) * 289;
+      document.getElementById('coach-ring').style.strokeDashoffset = offset;
+
+      const step = rubSteps.find(s => coachTime <= s.t && coachTime > s.t - 4);
+      if (step) document.getElementById('step-text').innerText = step.msg;
+    }
+
+    function resetCoach() {
+      clearInterval(coachInterval);
+      isCoaching = false;
+      coachTime = totalCoachTime;
+      document.getElementById('coach-time').innerText = "25s";
+      document.getElementById('coach-status').innerText = "Ready";
+      document.getElementById('coach-ring').style.strokeDashoffset = 0;
+      document.getElementById('step-text').innerText = "Press Start to begin training!";
+      document.getElementById('coach-start-btn').innerHTML = "▶️ Start Coach";
+    }
+
+    // Random Audit Facts Toast
+    const facts = [
+      { emoji: "📉", text: "Did you know? Moment 5 compliance dropped to 30.8% in early audits." },
+      { emoji: "🩺", text: "Almost 50% of staff forgot the 20-30s rub duration mid-rotation. Flashcards help!" },
+      { emoji: "🧼", text: "Over 88% of CGH SICU staff prefer alcohol rub over soap and water." },
+      { emoji: "👥", text: "Peer pressure matters! 50% of you said you'd wash hands if colleagues are watching." }
+    ];
+
+    function showRandomToast() {
+      const fact = facts[Math.floor(Math.random() * facts.length)];
+      document.getElementById('toast-emoji').innerText = fact.emoji;
+      document.getElementById('toast-text').innerText = fact.text;
+      
+      const toast = document.getElementById('audit-toast');
+      toast.classList.add('show');
+      
+      setTimeout(hideToast, 6000);
+    }
+
+    function hideToast() {
+      document.getElementById('audit-toast').classList.remove('show');
+    }
+
+    // Trigger a toast after 5 seconds, and then every 30 seconds
+    setTimeout(showRandomToast, 5000);
+    setInterval(showRandomToast, 30000);
+
+  </script>
+</body>
+</html>
